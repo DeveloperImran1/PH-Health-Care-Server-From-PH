@@ -17,7 +17,7 @@ const http_status_1 = __importDefault(require("http-status"));
 const config_1 = __importDefault(require("../../../config"));
 const catchAsync_1 = __importDefault(require("../../../shared/catchAsync"));
 const sendResponse_1 = __importDefault(require("../../../shared/sendResponse"));
-const auth_service_1 = require("./auth.service");
+const auth_service_1 = require("../auth/auth.service");
 const loginUser = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const accessTokenExpiresIn = config_1.default.jwt.expires_in;
     const refreshTokenExpiresIn = config_1.default.jwt.refresh_token_expires_in;
@@ -97,7 +97,7 @@ const loginUser = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void
         message: "Logged in successfully!",
         data: {
             needPasswordChange: result.needPasswordChange,
-        }
+        },
     });
 }));
 const refreshToken = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -210,7 +210,7 @@ const resetPassword = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, 
     // Extract token from Authorization header (remove "Bearer " prefix)
     const authHeader = req.headers.authorization;
     console.log({ authHeader });
-    const token = authHeader ? authHeader.replace('Bearer ', '') : null;
+    const token = authHeader ? authHeader.replace("Bearer ", "") : null;
     const user = req.user; // Will be populated if authenticated via middleware
     yield auth_service_1.AuthServices.resetPassword(token, req.body, user);
     (0, sendResponse_1.default)(res, {
@@ -236,5 +236,5 @@ exports.AuthController = {
     changePassword,
     forgotPassword,
     resetPassword,
-    getMe
+    getMe,
 };

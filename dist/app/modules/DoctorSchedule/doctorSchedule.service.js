@@ -24,22 +24,22 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.DoctorScheduleService = void 0;
+const http_status_1 = __importDefault(require("http-status"));
 const paginationHelper_1 = require("../../../helpers/paginationHelper");
 const prisma_1 = __importDefault(require("../../../shared/prisma"));
 const ApiError_1 = __importDefault(require("../../errors/ApiError"));
-const http_status_1 = __importDefault(require("http-status"));
 const insertIntoDB = (user, payload) => __awaiter(void 0, void 0, void 0, function* () {
     const doctorData = yield prisma_1.default.doctor.findUniqueOrThrow({
         where: {
-            email: user.email
-        }
+            email: user.email,
+        },
     });
-    const doctorScheduleData = payload.scheduleIds.map(scheduleId => ({
+    const doctorScheduleData = payload.scheduleIds.map((scheduleId) => ({
         doctorId: doctorData.id,
-        scheduleId
+        scheduleId,
     }));
     const result = yield prisma_1.default.doctorSchedules.createMany({
-        data: doctorScheduleData
+        data: doctorScheduleData,
     });
     return result;
 });
@@ -53,30 +53,31 @@ const getMySchedule = (filters, options, user) => __awaiter(void 0, void 0, void
                 {
                     schedule: {
                         startDateTime: {
-                            gte: startDate
-                        }
-                    }
+                            gte: startDate,
+                        },
+                    },
                 },
                 {
                     schedule: {
                         endDateTime: {
-                            lte: endDate
-                        }
-                    }
-                }
-            ]
+                            lte: endDate,
+                        },
+                    },
+                },
+            ],
         });
     }
-    ;
     if (Object.keys(filterData).length > 0) {
-        if (typeof filterData.isBooked === 'string' && filterData.isBooked === 'true') {
+        if (typeof filterData.isBooked === "string" &&
+            filterData.isBooked === "true") {
             filterData.isBooked = true;
         }
-        else if (typeof filterData.isBooked === 'string' && filterData.isBooked === 'false') {
+        else if (typeof filterData.isBooked === "string" &&
+            filterData.isBooked === "false") {
             filterData.isBooked = false;
         }
         andConditions.push({
-            AND: Object.keys(filterData).map(key => {
+            AND: Object.keys(filterData).map((key) => {
                 return {
                     [key]: {
                         equals: filterData[key],
@@ -92,10 +93,10 @@ const getMySchedule = (filters, options, user) => __awaiter(void 0, void 0, void
         take: limit,
         orderBy: options.sortBy && options.sortOrder
             ? { [options.sortBy]: options.sortOrder }
-            : {}
+            : {},
     });
     const total = yield prisma_1.default.doctorSchedules.count({
-        where: whereConditions
+        where: whereConditions,
     });
     return {
         meta: {
@@ -109,15 +110,15 @@ const getMySchedule = (filters, options, user) => __awaiter(void 0, void 0, void
 const deleteFromDB = (user, scheduleId) => __awaiter(void 0, void 0, void 0, function* () {
     const doctorData = yield prisma_1.default.doctor.findUniqueOrThrow({
         where: {
-            email: user === null || user === void 0 ? void 0 : user.email
-        }
+            email: user === null || user === void 0 ? void 0 : user.email,
+        },
     });
     const isBookedSchedule = yield prisma_1.default.doctorSchedules.findFirst({
         where: {
             doctorId: doctorData.id,
             scheduleId: scheduleId,
-            isBooked: true
-        }
+            isBooked: true,
+        },
     });
     if (isBookedSchedule) {
         throw new ApiError_1.default(http_status_1.default.BAD_REQUEST, "You can not delete the schedule because of the schedule is already booked!");
@@ -126,9 +127,9 @@ const deleteFromDB = (user, scheduleId) => __awaiter(void 0, void 0, void 0, fun
         where: {
             doctorId_scheduleId: {
                 doctorId: doctorData.id,
-                scheduleId: scheduleId
-            }
-        }
+                scheduleId: scheduleId,
+            },
+        },
     });
     return result;
 });
@@ -141,24 +142,26 @@ const getAllFromDB = (filters, options) => __awaiter(void 0, void 0, void 0, fun
             doctor: {
                 name: {
                     contains: searchTerm,
-                    mode: 'insensitive',
+                    mode: "insensitive",
                 },
             },
         });
     }
     if (Object.keys(filterData).length > 0) {
-        if (typeof filterData.isBooked === 'string' && filterData.isBooked === 'true') {
+        if (typeof filterData.isBooked === "string" &&
+            filterData.isBooked === "true") {
             filterData.isBooked = true;
         }
-        else if (typeof filterData.isBooked === 'string' && filterData.isBooked === 'false') {
+        else if (typeof filterData.isBooked === "string" &&
+            filterData.isBooked === "false") {
             filterData.isBooked = false;
         }
         andConditions.push({
             AND: Object.keys(filterData).map((key) => ({
                 [key]: {
-                    equals: filterData[key]
-                }
-            }))
+                    equals: filterData[key],
+                },
+            })),
         });
     }
     const whereConditions = andConditions.length > 0 ? { AND: andConditions } : {};
@@ -190,5 +193,5 @@ exports.DoctorScheduleService = {
     insertIntoDB,
     getMySchedule,
     deleteFromDB,
-    getAllFromDB
+    getAllFromDB,
 };

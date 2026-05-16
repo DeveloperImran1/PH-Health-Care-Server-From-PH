@@ -13,10 +13,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.MetaController = void 0;
-const catchAsync_1 = __importDefault(require("../../../shared/catchAsync"));
-const meta_service_1 = require("./meta.service");
-const sendResponse_1 = __importDefault(require("../../../shared/sendResponse"));
 const http_status_1 = __importDefault(require("http-status"));
+const catchAsync_1 = __importDefault(require("../../../shared/catchAsync"));
+const sendResponse_1 = __importDefault(require("../../../shared/sendResponse"));
+const meta_service_1 = require("../meta/meta.service");
 const fetchDashboardMetaData = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const user = req.user;
     const result = yield meta_service_1.MetaService.fetchDashboardMetaData(user);
@@ -24,9 +24,9 @@ const fetchDashboardMetaData = (0, catchAsync_1.default)((req, res) => __awaiter
         statusCode: http_status_1.default.OK,
         success: true,
         message: "Meta data retrival successfully!",
-        data: result
+        data: result,
     });
 }));
 exports.MetaController = {
-    fetchDashboardMetaData
+    fetchDashboardMetaData,
 };

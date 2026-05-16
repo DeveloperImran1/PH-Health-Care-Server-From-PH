@@ -63,7 +63,7 @@ const config_1 = __importDefault(require("../../../config"));
 const fileUploader_1 = require("../../../helpers/fileUploader");
 const paginationHelper_1 = require("../../../helpers/paginationHelper");
 const prisma_1 = __importDefault(require("../../../shared/prisma"));
-const user_constant_1 = require("./user.constant");
+const user_constant_1 = require("../user/user.constant");
 const createAdmin = (req) => __awaiter(void 0, void 0, void 0, function* () {
     const file = req.file;
     if (file) {
@@ -74,14 +74,14 @@ const createAdmin = (req) => __awaiter(void 0, void 0, void 0, function* () {
     const userData = {
         email: req.body.admin.email,
         password: hashedPassword,
-        role: client_1.UserRole.ADMIN
+        role: client_1.UserRole.ADMIN,
     };
     const result = yield prisma_1.default.$transaction((transactionClient) => __awaiter(void 0, void 0, void 0, function* () {
         yield transactionClient.user.create({
-            data: userData
+            data: userData,
         });
         const createdAdminData = yield transactionClient.admin.create({
-            data: req.body.admin
+            data: req.body.admin,
         });
         return createdAdminData;
     }));
@@ -164,14 +164,14 @@ const createPatient = (req) => __awaiter(void 0, void 0, void 0, function* () {
     const userData = {
         email: req.body.patient.email,
         password: hashedPassword,
-        role: client_1.UserRole.PATIENT
+        role: client_1.UserRole.PATIENT,
     };
     const result = yield prisma_1.default.$transaction((transactionClient) => __awaiter(void 0, void 0, void 0, function* () {
         yield transactionClient.user.create({
-            data: Object.assign(Object.assign({}, userData), { needPasswordChange: false })
+            data: Object.assign(Object.assign({}, userData), { needPasswordChange: false }),
         });
         const createdPatientData = yield transactionClient.patient.create({
-            data: req.body.patient
+            data: req.body.patient,
         });
         return createdPatientData;
     }));
@@ -183,35 +183,35 @@ const getAllFromDB = (params, options) => __awaiter(void 0, void 0, void 0, func
     const andConditions = [];
     if (params.searchTerm) {
         andConditions.push({
-            OR: user_constant_1.userSearchAbleFields.map(field => ({
+            OR: user_constant_1.userSearchAbleFields.map((field) => ({
                 [field]: {
                     contains: params.searchTerm,
-                    mode: 'insensitive'
-                }
-            }))
+                    mode: "insensitive",
+                },
+            })),
         });
     }
-    ;
     if (Object.keys(filterData).length > 0) {
         andConditions.push({
-            AND: Object.keys(filterData).map(key => ({
+            AND: Object.keys(filterData).map((key) => ({
                 [key]: {
-                    equals: filterData[key]
-                }
-            }))
+                    equals: filterData[key],
+                },
+            })),
         });
     }
-    ;
     const whereConditions = andConditions.length > 0 ? { AND: andConditions } : {};
     const result = yield prisma_1.default.user.findMany({
         where: whereConditions,
         skip,
         take: limit,
-        orderBy: options.sortBy && options.sortOrder ? {
-            [options.sortBy]: options.sortOrder
-        } : {
-            createdAt: 'desc'
-        },
+        orderBy: options.sortBy && options.sortOrder
+            ? {
+                [options.sortBy]: options.sortOrder,
+            }
+            : {
+                createdAt: "desc",
+            },
         select: {
             id: true,
             email: true,
@@ -222,32 +222,32 @@ const getAllFromDB = (params, options) => __awaiter(void 0, void 0, void 0, func
             updatedAt: true,
             admin: true,
             patient: true,
-            doctor: true
-        }
+            doctor: true,
+        },
     });
     const total = yield prisma_1.default.user.count({
-        where: whereConditions
+        where: whereConditions,
     });
     return {
         meta: {
             page,
             limit,
-            total
+            total,
         },
-        data: result
+        data: result,
     };
 });
 const changeProfileStatus = (id, status) => __awaiter(void 0, void 0, void 0, function* () {
     const userData = yield prisma_1.default.user.findUniqueOrThrow({
         where: {
-            id
-        }
+            id,
+        },
     });
     const updateUserStatus = yield prisma_1.default.user.update({
         where: {
-            id
+            id,
         },
-        data: status
+        data: status,
     });
     return updateUserStatus;
 });
@@ -366,8 +366,8 @@ const updateMyProfie = (user, req) => __awaiter(void 0, void 0, void 0, function
     const userInfo = yield prisma_1.default.user.findUniqueOrThrow({
         where: {
             email: user === null || user === void 0 ? void 0 : user.email,
-            status: client_1.UserStatus.ACTIVE
-        }
+            status: client_1.UserStatus.ACTIVE,
+        },
     });
     const file = req.file;
     if (file) {
@@ -378,33 +378,33 @@ const updateMyProfie = (user, req) => __awaiter(void 0, void 0, void 0, function
     if (userInfo.role === client_1.UserRole.SUPER_ADMIN) {
         profileInfo = yield prisma_1.default.admin.update({
             where: {
-                email: userInfo.email
+                email: userInfo.email,
             },
-            data: req.body
+            data: req.body,
         });
     }
     else if (userInfo.role === client_1.UserRole.ADMIN) {
         profileInfo = yield prisma_1.default.admin.update({
             where: {
-                email: userInfo.email
+                email: userInfo.email,
             },
-            data: req.body
+            data: req.body,
         });
     }
     else if (userInfo.role === client_1.UserRole.DOCTOR) {
         profileInfo = yield prisma_1.default.doctor.update({
             where: {
-                email: userInfo.email
+                email: userInfo.email,
             },
-            data: req.body
+            data: req.body,
         });
     }
     else if (userInfo.role === client_1.UserRole.PATIENT) {
         profileInfo = yield prisma_1.default.patient.update({
             where: {
-                email: userInfo.email
+                email: userInfo.email,
             },
-            data: req.body
+            data: req.body,
         });
     }
     return Object.assign({}, profileInfo);
@@ -416,5 +416,5 @@ exports.userService = {
     getAllFromDB,
     changeProfileStatus,
     getMyProfile,
-    updateMyProfie
+    updateMyProfie,
 };

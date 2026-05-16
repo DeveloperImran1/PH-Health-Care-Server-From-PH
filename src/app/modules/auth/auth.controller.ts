@@ -3,7 +3,7 @@ import httpStatus from "http-status";
 import config from "../../../config";
 import catchAsync from "../../../shared/catchAsync";
 import sendResponse from "../../../shared/sendResponse";
-import { AuthServices } from "./auth.service";
+import { AuthServices } from "../auth/auth.service";
 
 const loginUser = catchAsync(async (req: Request, res: Response) => {
   const accessTokenExpiresIn = config.jwt.expires_in as string;
@@ -15,14 +15,11 @@ const loginUser = catchAsync(async (req: Request, res: Response) => {
   const accessTokenValue = parseInt(accessTokenExpiresIn.slice(0, -1));
   if (accessTokenUnit === "y") {
     accessTokenMaxAge = accessTokenValue * 365 * 24 * 60 * 60 * 1000;
-  }
-  else if (accessTokenUnit === "M") {
+  } else if (accessTokenUnit === "M") {
     accessTokenMaxAge = accessTokenValue * 30 * 24 * 60 * 60 * 1000;
-  }
-  else if (accessTokenUnit === "w") {
+  } else if (accessTokenUnit === "w") {
     accessTokenMaxAge = accessTokenValue * 7 * 24 * 60 * 60 * 1000;
-  }
-  else if (accessTokenUnit === "d") {
+  } else if (accessTokenUnit === "d") {
     accessTokenMaxAge = accessTokenValue * 24 * 60 * 60 * 1000;
   } else if (accessTokenUnit === "h") {
     accessTokenMaxAge = accessTokenValue * 60 * 60 * 1000;
@@ -40,14 +37,11 @@ const loginUser = catchAsync(async (req: Request, res: Response) => {
   const refreshTokenValue = parseInt(refreshTokenExpiresIn.slice(0, -1));
   if (refreshTokenUnit === "y") {
     refreshTokenMaxAge = refreshTokenValue * 365 * 24 * 60 * 60 * 1000;
-  }
-  else if (refreshTokenUnit === "M") {
+  } else if (refreshTokenUnit === "M") {
     refreshTokenMaxAge = refreshTokenValue * 30 * 24 * 60 * 60 * 1000;
-  }
-  else if (refreshTokenUnit === "w") {
+  } else if (refreshTokenUnit === "w") {
     refreshTokenMaxAge = refreshTokenValue * 7 * 24 * 60 * 60 * 1000;
-  }
-  else if (refreshTokenUnit === "d") {
+  } else if (refreshTokenUnit === "d") {
     refreshTokenMaxAge = refreshTokenValue * 24 * 60 * 60 * 1000;
   } else if (refreshTokenUnit === "h") {
     refreshTokenMaxAge = refreshTokenValue * 60 * 60 * 1000;
@@ -79,7 +73,7 @@ const loginUser = catchAsync(async (req: Request, res: Response) => {
     message: "Logged in successfully!",
     data: {
       needPasswordChange: result.needPasswordChange,
-    }
+    },
   });
 });
 
@@ -99,14 +93,11 @@ REFRESH_TOKEN_EXPIRES_IN=1y
   const accessTokenValue = parseInt(accessTokenExpiresIn.slice(0, -1));
   if (accessTokenUnit === "y") {
     accessTokenMaxAge = accessTokenValue * 365 * 24 * 60 * 60 * 1000;
-  }
-  else if (accessTokenUnit === "M") {
+  } else if (accessTokenUnit === "M") {
     accessTokenMaxAge = accessTokenValue * 30 * 24 * 60 * 60 * 1000;
-  }
-  else if (accessTokenUnit === "w") {
+  } else if (accessTokenUnit === "w") {
     accessTokenMaxAge = accessTokenValue * 7 * 24 * 60 * 60 * 1000;
-  }
-  else if (accessTokenUnit === "d") {
+  } else if (accessTokenUnit === "d") {
     accessTokenMaxAge = accessTokenValue * 24 * 60 * 60 * 1000;
   } else if (accessTokenUnit === "h") {
     accessTokenMaxAge = accessTokenValue * 60 * 60 * 1000;
@@ -124,14 +115,11 @@ REFRESH_TOKEN_EXPIRES_IN=1y
   const refreshTokenValue = parseInt(refreshTokenExpiresIn.slice(0, -1));
   if (refreshTokenUnit === "y") {
     refreshTokenMaxAge = refreshTokenValue * 365 * 24 * 60 * 60 * 1000;
-  }
-  else if (refreshTokenUnit === "M") {
+  } else if (refreshTokenUnit === "M") {
     refreshTokenMaxAge = refreshTokenValue * 30 * 24 * 60 * 60 * 1000;
-  }
-  else if (refreshTokenUnit === "w") {
+  } else if (refreshTokenUnit === "w") {
     refreshTokenMaxAge = refreshTokenValue * 7 * 24 * 60 * 60 * 1000;
-  }
-  else if (refreshTokenUnit === "d") {
+  } else if (refreshTokenUnit === "d") {
     refreshTokenMaxAge = refreshTokenValue * 24 * 60 * 60 * 1000;
   } else if (refreshTokenUnit === "h") {
     refreshTokenMaxAge = refreshTokenValue * 60 * 60 * 1000;
@@ -142,7 +130,6 @@ REFRESH_TOKEN_EXPIRES_IN=1y
   } else {
     refreshTokenMaxAge = 1000 * 60 * 60 * 24 * 30; // default 30 days
   }
-
 
   const result = await AuthServices.refreshToken(refreshToken);
   res.cookie("accessToken", result.accessToken, {
@@ -181,7 +168,7 @@ const changePassword = catchAsync(
       message: "Password Changed successfully",
       data: result,
     });
-  }
+  },
 );
 
 const forgotPassword = catchAsync(async (req: Request, res: Response) => {
@@ -195,37 +182,39 @@ const forgotPassword = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-const resetPassword = catchAsync(async (req: Request & { user?: any }, res: Response) => {
-  // Extract token from Authorization header (remove "Bearer " prefix)
-  const authHeader = req.headers.authorization;
-  console.log({ authHeader });
-  const token = authHeader ? authHeader.replace('Bearer ', '') : null;
-  const user = req.user; // Will be populated if authenticated via middleware
+const resetPassword = catchAsync(
+  async (req: Request & { user?: any }, res: Response) => {
+    // Extract token from Authorization header (remove "Bearer " prefix)
+    const authHeader = req.headers.authorization;
+    console.log({ authHeader });
+    const token = authHeader ? authHeader.replace("Bearer ", "") : null;
+    const user = req.user; // Will be populated if authenticated via middleware
 
-  await AuthServices.resetPassword(token, req.body, user);
+    await AuthServices.resetPassword(token, req.body, user);
 
-  sendResponse(res, {
-    statusCode: httpStatus.OK,
-    success: true,
-    message: "Password Reset!",
-    data: null,
-  });
-});
+    sendResponse(res, {
+      statusCode: httpStatus.OK,
+      success: true,
+      message: "Password Reset!",
+      data: null,
+    });
+  },
+);
 
-const getMe = catchAsync(async (req: Request & { user?: any }, res: Response) => {
-  const user = req.cookies;
+const getMe = catchAsync(
+  async (req: Request & { user?: any }, res: Response) => {
+    const user = req.cookies;
 
-  const result = await AuthServices.getMe(user);
+    const result = await AuthServices.getMe(user);
 
-  sendResponse(res, {
-    statusCode: httpStatus.OK,
-    success: true,
-    message: "User retrieved successfully",
-    data: result,
-  });
-});
-
-
+    sendResponse(res, {
+      statusCode: httpStatus.OK,
+      success: true,
+      message: "User retrieved successfully",
+      data: result,
+    });
+  },
+);
 
 export const AuthController = {
   loginUser,
@@ -233,5 +222,5 @@ export const AuthController = {
   changePassword,
   forgotPassword,
   resetPassword,
-  getMe
+  getMe,
 };

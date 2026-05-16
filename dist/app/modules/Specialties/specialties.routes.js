@@ -4,12 +4,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.SpecialtiesRoutes = void 0;
-const express_1 = __importDefault(require("express"));
-const specialties_controller_1 = require("./specialties.controller");
-const fileUploader_1 = require("../../../helpers/fileUploader");
-const specialties_validation_1 = require("./specialties.validation");
-const auth_1 = __importDefault(require("../../middlewares/auth"));
 const client_1 = require("@prisma/client");
+const express_1 = __importDefault(require("express"));
+const fileUploader_1 = require("../../../helpers/fileUploader");
+const auth_1 = __importDefault(require("../../middlewares/auth"));
+const specialties_controller_1 = require("../specialties/specialties.controller");
+const specialties_validation_1 = require("../specialties/specialties.validation");
 const router = express_1.default.Router();
 // Task 1: Retrieve Specialties Data
 /**
@@ -17,8 +17,8 @@ const router = express_1.default.Router();
 - Implement an HTTP GET endpoint returning specialties in JSON format.
 - ENDPOINT: /specialties
 */
-router.get('/', specialties_controller_1.SpecialtiesController.getAllFromDB);
-router.post('/', fileUploader_1.fileUploader.upload.single('file'), (req, res, next) => {
+router.get("/", specialties_controller_1.SpecialtiesController.getAllFromDB);
+router.post("/", fileUploader_1.fileUploader.upload.single("file"), (req, res, next) => {
     req.body = specialties_validation_1.SpecialtiesValidtaion.create.parse(JSON.parse(req.body.data));
     return specialties_controller_1.SpecialtiesController.insertIntoDB(req, res, next);
 });
@@ -29,5 +29,5 @@ router.post('/', fileUploader_1.fileUploader.upload.single('file'), (req, res, n
 - Delete the specialty from the database and return a success message.
 - ENDPOINT: /specialties/:id
 */
-router.delete('/:id', (0, auth_1.default)(client_1.UserRole.SUPER_ADMIN, client_1.UserRole.ADMIN), specialties_controller_1.SpecialtiesController.deleteFromDB);
+router.delete("/:id", (0, auth_1.default)(client_1.UserRole.SUPER_ADMIN, client_1.UserRole.ADMIN), specialties_controller_1.SpecialtiesController.deleteFromDB);
 exports.SpecialtiesRoutes = router;

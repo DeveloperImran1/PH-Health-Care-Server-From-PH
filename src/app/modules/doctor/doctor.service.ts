@@ -3,12 +3,15 @@ import { askOpenRouter } from "../../../helpers/openRouterClient";
 import { paginationHelper } from "../../../helpers/paginationHelper";
 import prisma from "../../../shared/prisma";
 import { IPaginationOptions } from "../../interfaces/pagination";
-import { doctorSearchableFields } from "./doctor.constants";
-import { IDoctorFilterRequest, IDoctorUpdate } from "./doctor.interface";
+import { doctorSearchableFields } from "../doctor/doctor.constants";
+import {
+  IDoctorFilterRequest,
+  IDoctorUpdate,
+} from "../doctor/doctor.interface";
 
 const getAllFromDB = async (
   filters: IDoctorFilterRequest,
-  options: IPaginationOptions
+  options: IPaginationOptions,
 ) => {
   const { limit, page, skip } = paginationHelper.calculatePagination(options);
   const { searchTerm, specialties, ...filterData } = filters;
@@ -30,7 +33,9 @@ const getAllFromDB = async (
   // Handle multiple specialties: ?specialties=Cardiology&specialties=Neurology
   if (specialties && specialties.length > 0) {
     // Convert to array if single string
-    const specialtiesArray = Array.isArray(specialties) ? specialties : [specialties];
+    const specialtiesArray = Array.isArray(specialties)
+      ? specialties
+      : [specialties];
 
     andConditions.push({
       doctorSpecialties: {
@@ -76,14 +81,14 @@ const getAllFromDB = async (
           specialities: {
             select: {
               title: true,
-            }
+            },
           },
         },
       },
       doctorSchedules: {
         include: {
-          schedule: true
-        }
+          schedule: true,
+        },
       },
       review: {
         select: {
@@ -123,8 +128,8 @@ const getByIdFromDB = async (id: string): Promise<Doctor | null> => {
       },
       doctorSchedules: {
         include: {
-          schedule: true
-        }
+          schedule: true,
+        },
       },
       review: true,
     },
@@ -172,13 +177,13 @@ const updateIntoDB = async (id: string, payload: IDoctorUpdate) => {
 
       if (existingDoctorSpecialties.length !== removeSpecialties.length) {
         const foundIds = existingDoctorSpecialties.map(
-          (ds) => ds.specialitiesId
+          (ds) => ds.specialitiesId,
         );
         const notFound = removeSpecialties.filter(
-          (id) => !foundIds.includes(id)
+          (id) => !foundIds.includes(id),
         );
         throw new Error(
-          `Cannot remove non-existent specialties: ${notFound.join(", ")}`
+          `Cannot remove non-existent specialties: ${notFound.join(", ")}`,
         );
       }
 
@@ -209,12 +214,12 @@ const updateIntoDB = async (id: string, payload: IDoctorUpdate) => {
 
       const existingSpecialtyIds = existingSpecialties.map((s) => s.id);
       const invalidSpecialties = specialties.filter(
-        (id) => !existingSpecialtyIds.includes(id)
+        (id) => !existingSpecialtyIds.includes(id),
       );
 
       if (invalidSpecialties.length > 0) {
         throw new Error(
-          `Invalid specialty IDs: ${invalidSpecialties.join(", ")}`
+          `Invalid specialty IDs: ${invalidSpecialties.join(", ")}`,
         );
       }
 
@@ -233,10 +238,10 @@ const updateIntoDB = async (id: string, payload: IDoctorUpdate) => {
         });
 
       const currentSpecialtyIds = currentDoctorSpecialties.map(
-        (ds) => ds.specialitiesId
+        (ds) => ds.specialitiesId,
       );
       const newSpecialties = specialties.filter(
-        (id) => !currentSpecialtyIds.includes(id)
+        (id) => !currentSpecialtyIds.includes(id),
       );
 
       // Only create new specialties that don't already exist
@@ -350,11 +355,13 @@ const getAISuggestion = async (input: PatientInput) => {
       qualification: doctor.qualification,
       currentWorkingPlace: doctor.currentWorkingPlace,
       designation: doctor.designation,
-      averageRating: doctor.review && doctor.review.length > 0
-        ? doctor.review.reduce((sum: number, r: any) => sum + r.rating, 0) / doctor.review.length
-        : 0,
+      averageRating:
+        doctor.review && doctor.review.length > 0
+          ? doctor.review.reduce((sum: number, r: any) => sum + r.rating, 0) /
+            doctor.review.length
+          : 0,
       specialties: allSpecialties, // Array of all specialties
-      primarySpecialty: allSpecialties[0] || 'General', // For backward compatibility
+      primarySpecialty: allSpecialties[0] || "General", // For backward compatibility
     };
   });
 
@@ -431,13 +438,13 @@ RESPOND WITH ONLY THE JSON ARRAY - NO EXPLANATIONS, NO MARKDOWN, NO EXTRA TEXT.
 
     // Validate that response is an array
     if (!Array.isArray(suggestedDoctors)) {
-      console.error('AI response is not an array:', suggestedDoctors);
+      console.error("AI response is not an array:", suggestedDoctors);
       return [];
     }
 
     return suggestedDoctors;
   } catch (error) {
-    console.error('Error parsing AI suggestion response:', error);
+    console.error("Error parsing AI suggestion response:", error);
     // Fallback: return top-rated doctors with proper format
     return doctorsWithRatings
       .sort((a: any, b: any) => b.averageRating - a.averageRating)
@@ -459,7 +466,7 @@ RESPOND WITH ONLY THE JSON ARRAY - NO EXPLANATIONS, NO MARKDOWN, NO EXTRA TEXT.
 
 const getAllPublic = async (
   filters: IDoctorFilterRequest,
-  options: IPaginationOptions
+  options: IPaginationOptions,
 ) => {
   const { limit, page, skip } = paginationHelper.calculatePagination(options);
   const { searchTerm, specialties, ...filterData } = filters;
@@ -480,7 +487,9 @@ const getAllPublic = async (
   // Handle multiple specialties: ?specialties=Cardiology&specialties=Neurology
   if (specialties && specialties.length > 0) {
     // Convert to array if single string
-    const specialtiesArray = Array.isArray(specialties) ? specialties : [specialties];
+    const specialtiesArray = Array.isArray(specialties)
+      ? specialties
+      : [specialties];
 
     andConditions.push({
       doctorSpecialties: {

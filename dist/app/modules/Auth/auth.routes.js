@@ -8,7 +8,7 @@ const client_1 = require("@prisma/client");
 const express_1 = __importDefault(require("express"));
 const auth_1 = __importDefault(require("../../middlewares/auth"));
 const rateLimiter_1 = require("../../middlewares/rateLimiter");
-const auth_controller_1 = require("./auth.controller");
+const auth_controller_1 = require("../auth/auth.controller");
 const router = express_1.default.Router();
 router.post("/login", rateLimiter_1.authLimiter, auth_controller_1.AuthController.loginUser);
 router.post("/refresh-token", auth_controller_1.AuthController.refreshToken);

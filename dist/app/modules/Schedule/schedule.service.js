@@ -39,8 +39,8 @@ const inserIntoDB = (payload) => __awaiter(void 0, void 0, void 0, function* () 
     const lastDate = new Date(endDate); // end date
     while (currentDate <= lastDate) {
         // 09:30  ---> ['09', '30']
-        const startDateTime = new Date((0, date_fns_1.addMinutes)((0, date_fns_1.addHours)(`${(0, date_fns_1.format)(currentDate, 'yyyy-MM-dd')}`, Number(startTime.split(':')[0])), Number(startTime.split(':')[1])));
-        const endDateTime = new Date((0, date_fns_1.addMinutes)((0, date_fns_1.addHours)(`${(0, date_fns_1.format)(currentDate, 'yyyy-MM-dd')}`, Number(endTime.split(':')[0])), Number(endTime.split(':')[1])));
+        const startDateTime = new Date((0, date_fns_1.addMinutes)((0, date_fns_1.addHours)(`${(0, date_fns_1.format)(currentDate, "yyyy-MM-dd")}`, Number(startTime.split(":")[0])), Number(startTime.split(":")[1])));
+        const endDateTime = new Date((0, date_fns_1.addMinutes)((0, date_fns_1.addHours)(`${(0, date_fns_1.format)(currentDate, "yyyy-MM-dd")}`, Number(endTime.split(":")[0])), Number(endTime.split(":")[1])));
         while (startDateTime < endDateTime) {
             // const scheduleData = {
             //     startDateTime: startDateTime,
@@ -50,17 +50,17 @@ const inserIntoDB = (payload) => __awaiter(void 0, void 0, void 0, function* () 
             const e = yield convertDateTime((0, date_fns_1.addMinutes)(startDateTime, intervalTime));
             const scheduleData = {
                 startDateTime: s,
-                endDateTime: e
+                endDateTime: e,
             };
             const existingSchedule = yield prisma_1.default.schedule.findFirst({
                 where: {
                     startDateTime: scheduleData.startDateTime,
-                    endDateTime: scheduleData.endDateTime
-                }
+                    endDateTime: scheduleData.endDateTime,
+                },
             });
             if (!existingSchedule) {
                 const result = yield prisma_1.default.schedule.create({
-                    data: scheduleData
+                    data: scheduleData,
                 });
                 schedules.push(result);
             }
@@ -83,8 +83,8 @@ const getAllFromDB = (filters, options, user) => __awaiter(void 0, void 0, void 
         andConditions.push({
             startDateTime: {
                 gte: startOfDay,
-                lte: endOfDay
-            }
+                lte: endOfDay,
+            },
         });
     }
     else if (startDate) {
@@ -96,8 +96,8 @@ const getAllFromDB = (filters, options, user) => __awaiter(void 0, void 0, void 
         andConditions.push({
             startDateTime: {
                 gte: startOfDay,
-                lte: endOfDay
-            }
+                lte: endOfDay,
+            },
         });
     }
     else if (endDate) {
@@ -109,13 +109,13 @@ const getAllFromDB = (filters, options, user) => __awaiter(void 0, void 0, void 
         andConditions.push({
             startDateTime: {
                 gte: startOfDay,
-                lte: endOfDay
-            }
+                lte: endOfDay,
+            },
         });
     }
     if (Object.keys(filterData).length > 0) {
         andConditions.push({
-            AND: Object.keys(filterData).map(key => {
+            AND: Object.keys(filterData).map((key) => {
                 return {
                     [key]: {
                         equals: filterData[key],
@@ -128,26 +128,26 @@ const getAllFromDB = (filters, options, user) => __awaiter(void 0, void 0, void 
     const doctorSchedules = yield prisma_1.default.doctorSchedules.findMany({
         where: {
             doctor: {
-                email: user === null || user === void 0 ? void 0 : user.email
-            }
-        }
+                email: user === null || user === void 0 ? void 0 : user.email,
+            },
+        },
     });
-    const doctorScheduleIds = doctorSchedules.map(schedule => schedule.scheduleId);
+    const doctorScheduleIds = doctorSchedules.map((schedule) => schedule.scheduleId);
     const result = yield prisma_1.default.schedule.findMany({
         where: Object.assign(Object.assign({}, whereConditions), { id: {
-                notIn: doctorScheduleIds
+                notIn: doctorScheduleIds,
             } }),
         skip,
         take: limit,
         orderBy: options.sortBy && options.sortOrder
             ? { [options.sortBy]: options.sortOrder }
             : {
-                createdAt: 'desc',
-            }
+                createdAt: "desc",
+            },
     });
     const total = yield prisma_1.default.schedule.count({
         where: Object.assign(Object.assign({}, whereConditions), { id: {
-                notIn: doctorScheduleIds
+                notIn: doctorScheduleIds,
             } }),
     });
     return {
@@ -179,5 +179,5 @@ exports.ScheduleService = {
     inserIntoDB,
     getAllFromDB,
     getByIdFromDB,
-    deleteFromDB
+    deleteFromDB,
 };

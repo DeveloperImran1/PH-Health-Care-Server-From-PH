@@ -2,7 +2,7 @@ import { UserRole } from "@prisma/client";
 import express, { NextFunction, Request, Response } from "express";
 import auth from "../../middlewares/auth";
 import { authLimiter } from "../../middlewares/rateLimiter";
-import { AuthController } from "./auth.controller";
+import { AuthController } from "../auth/auth.controller";
 
 const router = express.Router();
 

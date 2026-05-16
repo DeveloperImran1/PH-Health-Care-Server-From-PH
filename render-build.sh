@@ -7,7 +7,8 @@
 set -o errexit
 
 # ১. প্যাকেজ ইনস্টল করা (এটার সাথেই postinstall রান হয়ে prisma generate হয়ে যাবে)
-npm install
+# Dev প্যাকেজসহ সব ইনস্টল করার জন্য --include=dev ব্যবহার করা হলো
+npm install --include=dev
 
 # ২. প্রজেক্ট বিল্ড করা
 npm run build

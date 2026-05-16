@@ -6,7 +6,7 @@ import config from "../../../config";
 import { jwtHelpers } from "../../../helpers/jwtHelpers";
 import prisma from "../../../shared/prisma";
 import ApiError from "../../errors/ApiError";
-import emailSender from "./emailSender";
+import emailSender from "../auth/emailSender";
 
 const loginUser = async (payload: { email: string; password: string }) => {
   const userData = await prisma.user.findUniqueOrThrow({

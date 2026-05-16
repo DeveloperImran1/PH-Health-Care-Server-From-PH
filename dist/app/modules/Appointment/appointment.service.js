@@ -34,21 +34,21 @@ const ApiError_1 = __importDefault(require("../../errors/ApiError"));
 const createAppointment = (user, payload) => __awaiter(void 0, void 0, void 0, function* () {
     const patientData = yield prisma_1.default.patient.findUniqueOrThrow({
         where: {
-            email: user === null || user === void 0 ? void 0 : user.email
-        }
+            email: user === null || user === void 0 ? void 0 : user.email,
+        },
     });
     const doctorData = yield prisma_1.default.doctor.findUniqueOrThrow({
         where: {
             id: payload.doctorId,
-            isDeleted: false
-        }
+            isDeleted: false,
+        },
     });
     yield prisma_1.default.doctorSchedules.findFirstOrThrow({
         where: {
             doctorId: doctorData.id,
             scheduleId: payload.scheduleId,
-            isBooked: false
-        }
+            isBooked: false,
+        },
     });
     const videoCallingId = (0, uuid_1.v4)();
     const result = yield prisma_1.default.$transaction((tnx) => __awaiter(void 0, void 0, void 0, function* () {
@@ -57,32 +57,32 @@ const createAppointment = (user, payload) => __awaiter(void 0, void 0, void 0, f
                 patientId: patientData.id,
                 doctorId: doctorData.id,
                 scheduleId: payload.scheduleId,
-                videoCallingId
-            }
+                videoCallingId,
+            },
         });
         yield tnx.doctorSchedules.update({
             where: {
                 doctorId_scheduleId: {
                     doctorId: doctorData.id,
-                    scheduleId: payload.scheduleId
-                }
+                    scheduleId: payload.scheduleId,
+                },
             },
             data: {
-                isBooked: true
-            }
+                isBooked: true,
+            },
         });
         const transactionId = (0, uuid_1.v4)();
         const paymentData = yield tnx.payment.create({
             data: {
                 appointmentId: appointmentData.id,
                 amount: doctorData.appointmentFee,
-                transactionId
-            }
+                transactionId,
+            },
         });
         const session = yield stripe_1.stripe.checkout.sessions.create({
             payment_method_types: ["card"],
             mode: "payment",
-            customer_email: (user === null || user === void 0 ? void 0 : user.email) || '',
+            customer_email: (user === null || user === void 0 ? void 0 : user.email) || "",
             line_items: [
                 {
                     price_data: {
@@ -97,10 +97,10 @@ const createAppointment = (user, payload) => __awaiter(void 0, void 0, void 0, f
             ],
             metadata: {
                 appointmentId: appointmentData.id,
-                paymentId: paymentData.id
+                paymentId: paymentData.id,
             },
-            success_url: `${process.env.FRONTEND_URL || 'http://localhost:3000'}/payment/success`,
-            cancel_url: `${process.env.FRONTEND_URL || 'http://localhost:3000'}/dashboard/my-appointments`,
+            success_url: `${process.env.FRONTEND_URL || "http://localhost:3000"}/payment/success`,
+            cancel_url: `${process.env.FRONTEND_URL || "http://localhost:3000"}/dashboard/my-appointments`,
         });
         return { paymentUrl: session.url };
     }));
@@ -113,22 +113,22 @@ const getMyAppointment = (user, filters, options) => __awaiter(void 0, void 0, v
     if ((user === null || user === void 0 ? void 0 : user.role) === client_1.UserRole.PATIENT) {
         andConditions.push({
             patient: {
-                email: user === null || user === void 0 ? void 0 : user.email
-            }
+                email: user === null || user === void 0 ? void 0 : user.email,
+            },
         });
     }
     else if ((user === null || user === void 0 ? void 0 : user.role) === client_1.UserRole.DOCTOR) {
         andConditions.push({
             doctor: {
-                email: user === null || user === void 0 ? void 0 : user.email
-            }
+                email: user === null || user === void 0 ? void 0 : user.email,
+            },
         });
     }
     if (Object.keys(filterData).length > 0) {
-        const filterConditions = Object.keys(filterData).map(key => ({
+        const filterConditions = Object.keys(filterData).map((key) => ({
             [key]: {
-                equals: filterData[key]
-            }
+                equals: filterData[key],
+            },
         }));
         andConditions.push(...filterConditions);
     }
@@ -138,10 +138,10 @@ const getMyAppointment = (user, filters, options) => __awaiter(void 0, void 0, v
         skip,
         take: limit,
         orderBy: {
-            [sortBy]: sortOrder
+            [sortBy]: sortOrder,
         },
-        include: (user === null || user === void 0 ? void 0 : user.role) === client_1.UserRole.DOCTOR ?
-            {
+        include: (user === null || user === void 0 ? void 0 : user.role) === client_1.UserRole.DOCTOR
+            ? {
                 patient: true,
                 schedule: true,
                 prescription: true,
@@ -151,49 +151,50 @@ const getMyAppointment = (user, filters, options) => __awaiter(void 0, void 0, v
                     include: {
                         doctorSpecialties: {
                             include: {
-                                specialities: true
-                            }
-                        }
-                    }
-                }
-            } : {
-            doctor: {
-                include: {
-                    doctorSpecialties: {
-                        include: {
-                            specialities: true
-                        }
-                    }
-                }
+                                specialities: true,
+                            },
+                        },
+                    },
+                },
+            }
+            : {
+                doctor: {
+                    include: {
+                        doctorSpecialties: {
+                            include: {
+                                specialities: true,
+                            },
+                        },
+                    },
+                },
+                schedule: true,
+                prescription: true,
+                review: true,
+                payment: true,
+                patient: true,
             },
-            schedule: true,
-            prescription: true,
-            review: true,
-            payment: true,
-            patient: true
-        }
     });
     const total = yield prisma_1.default.appointment.count({
-        where: whereConditions
+        where: whereConditions,
     });
     return {
         meta: {
             total,
             limit,
-            page
+            page,
         },
-        data: result
+        data: result,
     };
 });
 // task get all data from db (appointment data) - admin
 const updateAppointmentStatus = (appointmentId, status, user) => __awaiter(void 0, void 0, void 0, function* () {
     const appointmentData = yield prisma_1.default.appointment.findUniqueOrThrow({
         where: {
-            id: appointmentId
+            id: appointmentId,
         },
         include: {
-            doctor: true
-        }
+            doctor: true,
+        },
     });
     if ((user === null || user === void 0 ? void 0 : user.role) === client_1.UserRole.DOCTOR) {
         if (!((user === null || user === void 0 ? void 0 : user.email) === appointmentData.doctor.email))
@@ -201,11 +202,11 @@ const updateAppointmentStatus = (appointmentId, status, user) => __awaiter(void 
     }
     return yield prisma_1.default.appointment.update({
         where: {
-            id: appointmentId
+            id: appointmentId,
         },
         data: {
-            status
-        }
+            status,
+        },
     });
 });
 const getAllFromDB = (filters, options) => __awaiter(void 0, void 0, void 0, function* () {
@@ -215,15 +216,15 @@ const getAllFromDB = (filters, options) => __awaiter(void 0, void 0, void 0, fun
     if (patientEmail) {
         andConditions.push({
             patient: {
-                email: patientEmail
-            }
+                email: patientEmail,
+            },
         });
     }
     else if (doctorEmail) {
         andConditions.push({
             doctor: {
-                email: doctorEmail
-            }
+                email: doctorEmail,
+            },
         });
     }
     if (Object.keys(filterData).length > 0) {
@@ -231,10 +232,10 @@ const getAllFromDB = (filters, options) => __awaiter(void 0, void 0, void 0, fun
             AND: Object.keys(filterData).map((key) => {
                 return {
                     [key]: {
-                        equals: filterData[key]
-                    }
+                        equals: filterData[key],
+                    },
                 };
-            })
+            }),
         });
     }
     // console.dir(andConditions, { depth: Infinity })
@@ -246,27 +247,27 @@ const getAllFromDB = (filters, options) => __awaiter(void 0, void 0, void 0, fun
         orderBy: options.sortBy && options.sortOrder
             ? { [options.sortBy]: options.sortOrder }
             : {
-                createdAt: 'desc',
+                createdAt: "desc",
             },
         include: {
             doctor: {
                 include: {
                     doctorSpecialties: {
                         include: {
-                            specialities: true
-                        }
-                    }
-                }
+                            specialities: true,
+                        },
+                    },
+                },
             },
             patient: true,
             schedule: true,
             prescription: true,
             review: true,
-            payment: true
-        }
+            payment: true,
+        },
     });
     const total = yield prisma_1.default.appointment.count({
-        where: whereConditions
+        where: whereConditions,
     });
     return {
         meta: {
@@ -282,31 +283,31 @@ const cancelUnpaidAppointments = () => __awaiter(void 0, void 0, void 0, functio
     const unPaidAppointments = yield prisma_1.default.appointment.findMany({
         where: {
             createdAt: {
-                lte: thirtyMinAgo
+                lte: thirtyMinAgo,
             },
-            paymentStatus: client_1.PaymentStatus.UNPAID
-        }
+            paymentStatus: client_1.PaymentStatus.UNPAID,
+        },
     });
-    const appointmentIdsToCancel = unPaidAppointments.map(appointment => appointment.id);
+    const appointmentIdsToCancel = unPaidAppointments.map((appointment) => appointment.id);
     yield prisma_1.default.$transaction((tnx) => __awaiter(void 0, void 0, void 0, function* () {
         // Update appointments to CANCELED status instead of deleting
         yield tnx.appointment.updateMany({
             where: {
                 id: {
-                    in: appointmentIdsToCancel
-                }
+                    in: appointmentIdsToCancel,
+                },
             },
             data: {
-                status: client_1.AppointmentStatus.CANCELED
-            }
+                status: client_1.AppointmentStatus.CANCELED,
+            },
         });
         // Delete associated payments
         yield tnx.payment.deleteMany({
             where: {
                 appointmentId: {
-                    in: appointmentIdsToCancel
-                }
-            }
+                    in: appointmentIdsToCancel,
+                },
+            },
         });
         // Free up doctor schedules
         for (const unPaidAppointment of unPaidAppointments) {
@@ -314,12 +315,12 @@ const cancelUnpaidAppointments = () => __awaiter(void 0, void 0, void 0, functio
                 where: {
                     doctorId_scheduleId: {
                         doctorId: unPaidAppointment.doctorId,
-                        scheduleId: unPaidAppointment.scheduleId
-                    }
+                        scheduleId: unPaidAppointment.scheduleId,
+                    },
                 },
                 data: {
-                    isBooked: false
-                }
+                    isBooked: false,
+                },
             });
         }
     }));
@@ -327,21 +328,21 @@ const cancelUnpaidAppointments = () => __awaiter(void 0, void 0, void 0, functio
 const createAppointmentWithPayLater = (user, payload) => __awaiter(void 0, void 0, void 0, function* () {
     const patientData = yield prisma_1.default.patient.findUniqueOrThrow({
         where: {
-            email: user === null || user === void 0 ? void 0 : user.email
-        }
+            email: user === null || user === void 0 ? void 0 : user.email,
+        },
     });
     const doctorData = yield prisma_1.default.doctor.findUniqueOrThrow({
         where: {
             id: payload.doctorId,
-            isDeleted: false
-        }
+            isDeleted: false,
+        },
     });
     yield prisma_1.default.doctorSchedules.findFirstOrThrow({
         where: {
             doctorId: doctorData.id,
             scheduleId: payload.scheduleId,
-            isBooked: false
-        }
+            isBooked: false,
+        },
     });
     const videoCallingId = (0, uuid_1.v4)();
     const result = yield prisma_1.default.$transaction((tnx) => __awaiter(void 0, void 0, void 0, function* () {
@@ -350,32 +351,32 @@ const createAppointmentWithPayLater = (user, payload) => __awaiter(void 0, void 
                 patientId: patientData.id,
                 doctorId: doctorData.id,
                 scheduleId: payload.scheduleId,
-                videoCallingId
+                videoCallingId,
             },
             include: {
                 patient: true,
                 doctor: true,
-                schedule: true
-            }
+                schedule: true,
+            },
         });
         yield tnx.doctorSchedules.update({
             where: {
                 doctorId_scheduleId: {
                     doctorId: doctorData.id,
-                    scheduleId: payload.scheduleId
-                }
+                    scheduleId: payload.scheduleId,
+                },
             },
             data: {
-                isBooked: true
-            }
+                isBooked: true,
+            },
         });
         const transactionId = (0, uuid_1.v4)();
         yield tnx.payment.create({
             data: {
                 appointmentId: appointmentData.id,
                 amount: doctorData.appointmentFee,
-                transactionId
-            }
+                transactionId,
+            },
         });
         return appointmentData;
     }));
@@ -384,18 +385,18 @@ const createAppointmentWithPayLater = (user, payload) => __awaiter(void 0, void 
 const initiatePaymentForAppointment = (appointmentId, user) => __awaiter(void 0, void 0, void 0, function* () {
     const patientData = yield prisma_1.default.patient.findUniqueOrThrow({
         where: {
-            email: user === null || user === void 0 ? void 0 : user.email
-        }
+            email: user === null || user === void 0 ? void 0 : user.email,
+        },
     });
     const appointment = yield prisma_1.default.appointment.findUnique({
         where: {
             id: appointmentId,
-            patientId: patientData.id
+            patientId: patientData.id,
         },
         include: {
             payment: true,
-            doctor: true
-        }
+            doctor: true,
+        },
     });
     if (!appointment) {
         throw new ApiError_1.default(http_status_1.default.BAD_REQUEST, "Appointment not found or unauthorized");
@@ -410,7 +411,7 @@ const initiatePaymentForAppointment = (appointmentId, user) => __awaiter(void 0,
     const session = yield stripe_1.stripe.checkout.sessions.create({
         payment_method_types: ["card"],
         mode: "payment",
-        customer_email: (user === null || user === void 0 ? void 0 : user.email) || '',
+        customer_email: (user === null || user === void 0 ? void 0 : user.email) || "",
         line_items: [
             {
                 price_data: {
@@ -425,10 +426,10 @@ const initiatePaymentForAppointment = (appointmentId, user) => __awaiter(void 0,
         ],
         metadata: {
             appointmentId: appointment.id,
-            paymentId: appointment.payment.id
+            paymentId: appointment.payment.id,
         },
-        success_url: `${process.env.FRONTEND_URL || 'http://localhost:3000'}/payment/success`,
-        cancel_url: `${process.env.FRONTEND_URL || 'http://localhost:3000'}/dashboard/my-appointments`,
+        success_url: `${process.env.FRONTEND_URL || "http://localhost:3000"}/payment/success`,
+        cancel_url: `${process.env.FRONTEND_URL || "http://localhost:3000"}/dashboard/my-appointments`,
     });
     return { paymentUrl: session.url };
 });
@@ -439,5 +440,5 @@ exports.AppointmentService = {
     getAllFromDB,
     cancelUnpaidAppointments,
     createAppointmentWithPayLater,
-    initiatePaymentForAppointment
+    initiatePaymentForAppointment,
 };

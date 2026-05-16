@@ -28,7 +28,7 @@ const client_1 = require("@prisma/client");
 const openRouterClient_1 = require("../../../helpers/openRouterClient");
 const paginationHelper_1 = require("../../../helpers/paginationHelper");
 const prisma_1 = __importDefault(require("../../../shared/prisma"));
-const doctor_constants_1 = require("./doctor.constants");
+const doctor_constants_1 = require("../doctor/doctor.constants");
 const getAllFromDB = (filters, options) => __awaiter(void 0, void 0, void 0, function* () {
     const { limit, page, skip } = paginationHelper_1.paginationHelper.calculatePagination(options);
     const { searchTerm, specialties } = filters, filterData = __rest(filters, ["searchTerm", "specialties"]);
@@ -47,7 +47,9 @@ const getAllFromDB = (filters, options) => __awaiter(void 0, void 0, void 0, fun
     // Handle multiple specialties: ?specialties=Cardiology&specialties=Neurology
     if (specialties && specialties.length > 0) {
         // Convert to array if single string
-        const specialtiesArray = Array.isArray(specialties) ? specialties : [specialties];
+        const specialtiesArray = Array.isArray(specialties)
+            ? specialties
+            : [specialties];
         andConditions.push({
             doctorSpecialties: {
                 some: {
@@ -86,14 +88,14 @@ const getAllFromDB = (filters, options) => __awaiter(void 0, void 0, void 0, fun
                     specialities: {
                         select: {
                             title: true,
-                        }
+                        },
                     },
                 },
             },
             doctorSchedules: {
                 include: {
-                    schedule: true
-                }
+                    schedule: true,
+                },
             },
             review: {
                 select: {
@@ -129,8 +131,8 @@ const getByIdFromDB = (id) => __awaiter(void 0, void 0, void 0, function* () {
             },
             doctorSchedules: {
                 include: {
-                    schedule: true
-                }
+                    schedule: true,
+                },
             },
             review: true,
         },
@@ -310,10 +312,11 @@ const getAISuggestion = (input) => __awaiter(void 0, void 0, void 0, function* (
             currentWorkingPlace: doctor.currentWorkingPlace,
             designation: doctor.designation,
             averageRating: doctor.review && doctor.review.length > 0
-                ? doctor.review.reduce((sum, r) => sum + r.rating, 0) / doctor.review.length
+                ? doctor.review.reduce((sum, r) => sum + r.rating, 0) /
+                    doctor.review.length
                 : 0,
             specialties: allSpecialties, // Array of all specialties
-            primarySpecialty: allSpecialties[0] || 'General', // For backward compatibility
+            primarySpecialty: allSpecialties[0] || "General", // For backward compatibility
         };
     });
     const systemMessage = {
@@ -383,13 +386,13 @@ RESPOND WITH ONLY THE JSON ARRAY - NO EXPLANATIONS, NO MARKDOWN, NO EXTRA TEXT.
         const suggestedDoctors = JSON.parse(cleanedJson);
         // Validate that response is an array
         if (!Array.isArray(suggestedDoctors)) {
-            console.error('AI response is not an array:', suggestedDoctors);
+            console.error("AI response is not an array:", suggestedDoctors);
             return [];
         }
         return suggestedDoctors;
     }
     catch (error) {
-        console.error('Error parsing AI suggestion response:', error);
+        console.error("Error parsing AI suggestion response:", error);
         // Fallback: return top-rated doctors with proper format
         return doctorsWithRatings
             .sort((a, b) => b.averageRating - a.averageRating)
@@ -425,7 +428,9 @@ const getAllPublic = (filters, options) => __awaiter(void 0, void 0, void 0, fun
     // Handle multiple specialties: ?specialties=Cardiology&specialties=Neurology
     if (specialties && specialties.length > 0) {
         // Convert to array if single string
-        const specialtiesArray = Array.isArray(specialties) ? specialties : [specialties];
+        const specialtiesArray = Array.isArray(specialties)
+            ? specialties
+            : [specialties];
         andConditions.push({
             doctorSpecialties: {
                 some: {

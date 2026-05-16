@@ -27,34 +27,32 @@ exports.AdminService = void 0;
 const client_1 = require("@prisma/client");
 const paginationHelper_1 = require("../../../helpers/paginationHelper");
 const prisma_1 = __importDefault(require("../../../shared/prisma"));
-const admin_constant_1 = require("./admin.constant");
+const admin_constant_1 = require("../admin/admin.constant");
 const getAllFromDB = (params, options) => __awaiter(void 0, void 0, void 0, function* () {
     const { page, limit, skip } = paginationHelper_1.paginationHelper.calculatePagination(options);
     const { searchTerm } = params, filterData = __rest(params, ["searchTerm"]);
     const andConditions = [];
     if (params.searchTerm) {
         andConditions.push({
-            OR: admin_constant_1.adminSearchAbleFields.map(field => ({
+            OR: admin_constant_1.adminSearchAbleFields.map((field) => ({
                 [field]: {
                     contains: params.searchTerm,
-                    mode: 'insensitive'
-                }
-            }))
+                    mode: "insensitive",
+                },
+            })),
         });
     }
-    ;
     if (Object.keys(filterData).length > 0) {
         andConditions.push({
-            AND: Object.keys(filterData).map(key => ({
+            AND: Object.keys(filterData).map((key) => ({
                 [key]: {
-                    equals: filterData[key]
-                }
-            }))
+                    equals: filterData[key],
+                },
+            })),
         });
     }
-    ;
     andConditions.push({
-        isDeleted: false
+        isDeleted: false,
     });
     //console.dir(andConditions, { depth: 'inifinity' })
     const whereConditions = { AND: andConditions };
@@ -62,30 +60,32 @@ const getAllFromDB = (params, options) => __awaiter(void 0, void 0, void 0, func
         where: whereConditions,
         skip,
         take: limit,
-        orderBy: options.sortBy && options.sortOrder ? {
-            [options.sortBy]: options.sortOrder
-        } : {
-            createdAt: 'desc'
-        }
+        orderBy: options.sortBy && options.sortOrder
+            ? {
+                [options.sortBy]: options.sortOrder,
+            }
+            : {
+                createdAt: "desc",
+            },
     });
     const total = yield prisma_1.default.admin.count({
-        where: whereConditions
+        where: whereConditions,
     });
     return {
         meta: {
             page,
             limit,
-            total
+            total,
         },
-        data: result
+        data: result,
     };
 });
 const getByIdFromDB = (id) => __awaiter(void 0, void 0, void 0, function* () {
     const result = yield prisma_1.default.admin.findUnique({
         where: {
             id,
-            isDeleted: false
-        }
+            isDeleted: false,
+        },
     });
     return result;
 });
@@ -93,33 +93,33 @@ const updateIntoDB = (id, data) => __awaiter(void 0, void 0, void 0, function* (
     yield prisma_1.default.admin.findUniqueOrThrow({
         where: {
             id,
-            isDeleted: false
-        }
+            isDeleted: false,
+        },
     });
     const result = yield prisma_1.default.admin.update({
         where: {
-            id
+            id,
         },
-        data
+        data,
     });
     return result;
 });
 const deleteFromDB = (id) => __awaiter(void 0, void 0, void 0, function* () {
     yield prisma_1.default.admin.findUniqueOrThrow({
         where: {
-            id
-        }
+            id,
+        },
     });
     const result = yield prisma_1.default.$transaction((transactionClient) => __awaiter(void 0, void 0, void 0, function* () {
         const adminDeletedData = yield transactionClient.admin.delete({
             where: {
-                id
-            }
+                id,
+            },
         });
         yield transactionClient.user.delete({
             where: {
-                email: adminDeletedData.email
-            }
+                email: adminDeletedData.email,
+            },
         });
         return adminDeletedData;
     }));
@@ -129,25 +129,25 @@ const softDeleteFromDB = (id) => __awaiter(void 0, void 0, void 0, function* () 
     yield prisma_1.default.admin.findUniqueOrThrow({
         where: {
             id,
-            isDeleted: false
-        }
+            isDeleted: false,
+        },
     });
     const result = yield prisma_1.default.$transaction((transactionClient) => __awaiter(void 0, void 0, void 0, function* () {
         const adminDeletedData = yield transactionClient.admin.update({
             where: {
-                id
+                id,
             },
             data: {
-                isDeleted: true
-            }
+                isDeleted: true,
+            },
         });
         yield transactionClient.user.update({
             where: {
-                email: adminDeletedData.email
+                email: adminDeletedData.email,
             },
             data: {
-                status: client_1.UserStatus.DELETED
-            }
+                status: client_1.UserStatus.DELETED,
+            },
         });
         return adminDeletedData;
     }));
@@ -158,5 +158,5 @@ exports.AdminService = {
     getByIdFromDB,
     updateIntoDB,
     deleteFromDB,
-    softDeleteFromDB
+    softDeleteFromDB,
 };
