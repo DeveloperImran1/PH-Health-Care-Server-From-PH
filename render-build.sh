@@ -6,3 +6,12 @@ npm install
 npm run build
 npx prisma generate
 npx prisma migrate deploy
+
+
+# #!/usr/bin/env bash
+# # exit on error
+# set -o errexit
+
+# npm install
+# npx prisma generate --schema=./prisma/schema
+# npm run build
