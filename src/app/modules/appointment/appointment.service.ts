@@ -89,8 +89,8 @@ const createAppointment = async (user: IAuthUser, payload: any) => {
         appointmentId: appointmentData.id,
         paymentId: paymentData.id,
       },
-      success_url: `${process.env.FRONTEND_URL || "http://localhost:3000"}/payment/success`,
-      cancel_url: `${process.env.FRONTEND_URL || "http://localhost:3000"}/dashboard/my-appointments`,
+      success_url: `${process.env.FRONTEND_URL || "https://ph-health-care-virid.vercel.app"}/payment/success`,
+      cancel_url: `${process.env.FRONTEND_URL || "https://ph-health-care-virid.vercel.app"}/dashboard/my-appointments`,
     });
 
     return { paymentUrl: session.url };
@@ -489,8 +489,8 @@ const initiatePaymentForAppointment = async (
       appointmentId: appointment.id,
       paymentId: appointment.payment!.id,
     },
-    success_url: `${process.env.FRONTEND_URL || "http://localhost:3000"}/payment/success`,
-    cancel_url: `${process.env.FRONTEND_URL || "http://localhost:3000"}/dashboard/my-appointments`,
+    success_url: `${process.env.FRONTEND_URL || "https://ph-health-care-virid.vercel.app"}/payment/success`,
+    cancel_url: `${process.env.FRONTEND_URL || "https://ph-health-care-virid.vercel.app"}/dashboard/my-appointments`,
   });
 
   return { paymentUrl: session.url };
